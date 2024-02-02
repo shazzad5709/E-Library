@@ -17,12 +17,13 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
+// Add Book
 app.post('/api/books', async (req, res) => {
   const newBook = new Book(req.body);
 
 
   const book = await Book.create(newBook);
-  
+
   const response = {
     id: book.id,
     title: book.title,
@@ -41,11 +42,24 @@ app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
 
+// Fetch All Books
 app.get('/api/books', async (req, res) => {
   const books = await Book.find().lean();
   books.forEach(book => {
     delete book._id;
     delete book.__v;
   });
-  res.status(200).json({"books": books});
+  res.status(200).json({ "books": books });
+});
+
+// Fetch Book by ID
+app.get('/api/books/:id', async (req, res) => {
+  try {
+    const book = await Book.findOne({ id: req.params.id }).lean();
+    delete book._id;
+    delete book.__v;
+    res.status(200).json(book);
+  } catch (error) {
+    res.status(404).json({ message: "Book with id: " + req.params.id + " not found" });
+  }
 });
