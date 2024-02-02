@@ -40,3 +40,12 @@ app.put('/api/books/:id', (req, res) => {
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
+
+app.get('/api/books', async (req, res) => {
+  const books = await Book.find().lean();
+  books.forEach(book => {
+    delete book._id;
+    delete book.__v;
+  });
+  res.status(200).json({"books": books});
+});
