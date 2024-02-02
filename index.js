@@ -44,12 +44,29 @@ app.listen(port, () => {
 
 // Fetch All Books
 app.get('/api/books', async (req, res) => {
-  const books = await Book.find().lean();
-  books.forEach(book => {
-    delete book._id;
-    delete book.__v;
-  });
-  res.status(200).json({ "books": books });
+  const searchField = req.query.title ? 'title' : req.query.author ? 'author' : req.query.genre ? 'genre' : null;
+  const searchValue = req.query[searchField];
+  const sortField = req.query.sort;
+  const sortOrder = req.query.order === 'DESC' ? -1 : 1;
+  console.log(searchField, searchValue, sortField, sortOrder);
+
+  if (searchField && searchValue) {
+    const books = await Book.find({ [searchField]: searchValue }).sort({ [sortField]: sortOrder }).lean();
+    books.forEach(book => {
+      delete book._id;
+      delete book.__v;
+    });
+    res.status(200).json({ "books": books });
+  }
+
+  else {
+    const books = await Book.find().lean();
+    books.forEach(book => {
+      delete book._id;
+      delete book.__v;
+    });
+    res.status(200).json({ "books": books });
+  }
 });
 
 // Fetch Book by ID
