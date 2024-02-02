@@ -1,9 +1,40 @@
 const express = require('express');
 const app = express();
 const port = 5000;
+const mongoose = require('mongoose');
+const Book = require('./model/book');
+
+app.use(express.json());
+
+const uri = 'mongodb://localhost:27017/bookstore';
+mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+const connection = mongoose.connection
+connection.once('open', () => {
+  console.log('MongoDB database connection established successfully')
+})
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
+});
+
+app.post('/api/books', async (req, res) => {
+  const newBook = new Book(req.body);
+
+
+  const book = await Book.create(newBook);
+  
+  const response = {
+    id: book.id,
+    title: book.title,
+    author: book.author,
+    genre: book.genre,
+    price: book.price,
+  }
+  res.status(201).json(response);
+});
+
+app.put('/api/books/:id', (req, res) => {
+  res.send(`PUT request to update book with id ${req.params.id}`);
 });
 
 app.listen(port, () => {
