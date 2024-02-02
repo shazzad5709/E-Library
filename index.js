@@ -11,17 +11,11 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
 const connection = mongoose.connection
 connection.once('open', () => {
   console.log('MongoDB database connection established successfully')
-})
-
-app.get('/', (req, res) => {
-  res.send('Hello World!');
 });
 
 // Add Book
 app.post('/api/books', async (req, res) => {
   const newBook = new Book(req.body);
-
-
   const book = await Book.create(newBook);
 
   const response = {
@@ -34,12 +28,23 @@ app.post('/api/books', async (req, res) => {
   res.status(201).json(response);
 });
 
-app.put('/api/books/:id', (req, res) => {
-  res.send(`PUT request to update book with id ${req.params.id}`);
-});
-
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+app.put('/api/books/:id', async (req, res) => {
+  try {
+    const book = await Book.findOneAndUpdate({
+      id: req.params.id
+    }, req.body, { new: true });
+    
+    const response = {
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      genre: book.genre,
+      price: book.price,
+    }
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(404).json({ message: "Book with id: " + req.params.id + " not found" });
+  }
 });
 
 // Fetch All Books
@@ -79,4 +84,9 @@ app.get('/api/books/:id', async (req, res) => {
   } catch (error) {
     res.status(404).json({ message: "Book with id: " + req.params.id + " not found" });
   }
+});
+
+
+app.listen(port, () => {
+  console.log(`Example app listening at http://localhost:${port}`);
 });
