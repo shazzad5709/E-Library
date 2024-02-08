@@ -6,14 +6,17 @@ const Book = require('./model/book');
 
 app.use(express.json());
 
-const uri = 'mongodb://localhost:27017/bookstore';
-mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+const uri = 'mongodb://mongodb:27017/bookstore';
+mongoose.connect(uri)
 const connection = mongoose.connection
 connection.once('open', () => {
   console.log('MongoDB database connection established successfully')
 });
 
 // Add Book
+app.get('/', async(req, res)=>{
+  res.status(200).json({message:"Hello"});
+})
 app.post('/api/books', async (req, res) => {
   const newBook = new Book(req.body);
   const book = await Book.create(newBook);
